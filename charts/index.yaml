@@ -317,6 +317,24 @@ entries:
       created: "2026-11-10T19:44:50Z"
       urls:
         - ./kube-prometheus-stack-93.1.2.tgz
+  litellm:
+    - apiVersion: v2
+      name: litellm
+      version: 1.106.7-1
+      appVersion: 1.106.7
+      description: The LiteLLM AI gateway with the CloudNativePG database it stores its keys, budgets and spend logs in, installed as one release.
+      type: application
+      dependencies:
+        - name: litellm-helm
+          repository: ""
+          version: 1.106.7
+        - name: litellm-db
+          repository: ""
+          version: 0.1.0
+      digest: 48dafc4740bfb0b73baf8c3ca748298c8a50f99e2a7e15ed225498a2c57d44a1
+      created: "2026-11-15T10:19:33Z"
+      urls:
+        - ./litellm-1.106.7-1.tgz
   litellm-helm:
     - apiVersion: v2
       name: litellm-helm

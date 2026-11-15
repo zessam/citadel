@@ -1,0 +1,94 @@
+# Values for the litellm umbrella chart (citadel/charts-src/litellm).
+#
+# Everything below is re-keyed for the umbrella: a block named after a
+# subchart configures that subchart, so `litellm-helm:` configures the upstream
+# proxy chart and `litellm-db:` configures the bundled CloudNativePG chart. A
+# key that is not named after one of them is not read by anything.
+#
+# No secrets ever go in this file. The LiteLLM master key and salt key live in
+# the Secret litellm-secrets, which is created outside Git, and the database
+# credentials in the Secret litellm-db-app, which CloudNativePG creates itself.
+# This file only names those Secrets.
+
+# ---------------------------------------------------------------------------
+# litellm-helm: the AI gateway (vendored upstream chart 1.106.7)
+# ---------------------------------------------------------------------------
+litellm-helm:
+  image:
+    tag: "1.106.7"
+    pullPolicy: IfNotPresent
+
+  nodeSelector:
+    pool: management
+
+  # Without masterkeySecretName, the chart generates the key with a Helm lookup.
+  # Argo CD cannot run lookup, so the key would change on every sync.
+  masterkeySecretName: litellm-secrets
+  masterkeySecretKey: LITELLM_MASTER_KEY
+  environmentSecrets:
+    - litellm-secrets
+
+  # PostgreSQL from the bundled litellm-db subchart, read through the Secret
+  # litellm-db-app that the CloudNativePG operator creates for its Cluster
+  # (keys username, password, host). Not the bundled Bitnami chart: its password
+  # would be in Git, and its bitnamilegacy images get no updates.
+  db:
+    deployStandalone: false
+    useExisting: true
+    database: litellm
+    secret:
+      name: litellm-db-app
+      usernameKey: username
+      passwordKey: password
+      endpointKey: host
+
+  # The proxy's coordination store. The gateway runs single-writer against the
+  # CNPG database, so no Redis is deployed.
+  redis:
+    enabled: false
+
+  proxy_config:
+    model_list:
+      # The vLLM model behind the KServe gateway (Envoy, llm-d scheduler).
+      # Path /<namespace>/<name>/v1 of the LLMInferenceService inference/smollm2.
+      - model_name: smollm2-135m-instruct
+        litellm_params:
+          model: hosted_vllm/smollm2-135m-instruct
+          api_base: http://kserve-ingress-gateway.envoy-gateway-system.svc.cluster.local/inference/smollm2/v1
+    general_settings:
+      master_key: os.environ/PROXY_MASTER_KEY
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+
+  # The chart's own Service has no nodePort field. This second Service exposes
+  # the proxy and the UI on NodePort 30080. kind maps host 127.0.0.1:8080 to it.
+  extraResources:
+    - apiVersion: v1
+      kind: Service
+      metadata:
+        name: litellm-nodeport
+      spec:
+        type: NodePort
+        selector:
+          app.kubernetes.io/name: litellm
+          app.kubernetes.io/instance: litellm
+        ports:
+          - name: http
+            port: 4000
+            targetPort: http
+            nodePort: 30080
+
+# ---------------------------------------------------------------------------
+# litellm-db: the CloudNativePG database (bundled local chart 0.1.0)
+# ---------------------------------------------------------------------------
+litellm-db:
+  # Names the CNPG Cluster, and with it the Service litellm-db-rw and the
+  # Secret litellm-db-app that litellm-helm.db.secret.name points at above. The
+  # image, instances, storage and resource defaults are the subchart's own, see
+  # charts/litellm-db/values.yaml.
+  name: litellm-db

@@ -1,0 +1,24 @@
+apiVersion: v2
+name: litellm
+description: The LiteLLM AI gateway with the CloudNativePG database it stores its keys, budgets and spend logs in, installed as one release.
+type: application
+version: 1.106.7-1
+appVersion: "1.106.7"
+
+# Both dependencies are bundled in charts/ next to this file, so Helm resolves
+# the whole release from this one archive and needs no repository access.
+# `repository: ""` is how a chart that is already on disk is declared: helm lint,
+# helm package and helm dependency list all accept it, and `helm dependency list`
+# reports the archive as ok and the unpacked directory as unpacked. Nothing here
+# needs helm dependency update, which is what would turn an empty repository into
+# a "can't get a valid version for repositories" error.
+dependencies:
+  # The proxy itself, vendored byte for byte from upstream.
+  - name: litellm-helm
+    version: 1.106.7
+    repository: ""
+  # The CloudNativePG Cluster that backs it, plus the litellm-db-app Secret that
+  # LiteLLM reads its credentials from.
+  - name: litellm-db
+    version: 0.1.0
+    repository: ""

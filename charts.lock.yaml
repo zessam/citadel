@@ -13,10 +13,16 @@
 #   version    chart version inside Chart.yaml, and the filename version
 #   tag        upstream ref that Argo CD pins (targetRevision). Equal to version
 #              for http sources, where Helm uses the version itself.
-#   source     http = a tar index repository, oci = an OCI registry artifact
+#   source     http = a tar index repository, oci = an OCI registry artifact,
+#              local = a chart this repository builds itself
 #   repository index repository, or the OCI repository path
 #   url        direct archive url for http sources
 #   registry   OCI registry for oci sources
+#   path       for local sources, the chart directory to hand to helm, relative
+#              to the repository root. Packaging stamps the build time into the
+#              archive, so digest identifies the archive committed here rather
+#              than any rebuild of the same source; use --update after editing
+#              a chart under charts-src/.
 #   digest     sha256 of the archive as stored here, as a lowercase hex string
 #   pinnedBy   the Argo CD Application that installs this chart
 #
@@ -178,3 +184,20 @@ charts:
     digest: 870d0e849bd907952eaecd71486452c77ddd2bbb26d3524899d2110b0988b06f
     size: 197232
     pinnedBy: ai-inference-platform/argocd/apps/management/litellm/litellm.yaml
+  # management/litellm / litellm, the umbrella chart. Built here, not downloaded:
+  # charts-src/litellm is its source, and it bundles the litellm-helm archive
+  # above plus the CloudNativePG database chart. Nothing pins it yet: the
+  # litellm Application still names the upstream chart, so switching it over to
+  # citadel is what will pin this one.
+  - name: litellm
+    version: 1.106.7-1
+    tag: 1.106.7-1
+    source: local
+    registry: ""
+    repository: ""
+    url: ""
+    path: charts-src/litellm
+    file: litellm-1.106.7-1.tgz
+    digest: 48dafc4740bfb0b73baf8c3ca748298c8a50f99e2a7e15ed225498a2c57d44a1
+    size: 199340
+    pinnedBy: ""

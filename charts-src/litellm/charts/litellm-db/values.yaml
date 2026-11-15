@@ -1,0 +1,27 @@
+# Defaults for the litellm-db chart, bundled into the litellm umbrella chart
+# (charts-src/litellm). These are the values the standalone install of this
+# chart set, so an umbrella release that sets nothing under litellm-db: still
+# gets the same database. Any of them can be overridden from the umbrella
+# values.yaml instead.
+
+name: litellm-db
+instances: 1
+
+# PostgreSQL 17, pinned. "minimal" has no extra extensions.
+imageName: ghcr.io/cloudnative-pg/postgresql:17.9-minimal-trixie
+
+database: litellm
+owner: litellm
+
+# Uses the default StorageClass of the cluster (kind: "standard").
+storageSize: 2Gi
+
+nodeSelector:
+  pool: management
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1Gi

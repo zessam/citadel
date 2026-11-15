@@ -11,11 +11,18 @@
 //   node tools/fetch-charts.mjs --force    re-download every chart, rebuild index.yaml
 //   node tools/fetch-charts.mjs --update   re-download and refresh pinned digests in the lock
 //
-// Only Node is required. Chart.yaml is read straight out of each .tgz, so the
-// index entries always match the archive that a release would install.
+// Node is required, and nothing else, except for a chart the lock declares as
+// source: local. Those are built here by this repository, so packaging them is
+// the one step that needs helm.
+//
+// Chart.yaml is read straight out of each .tgz, so the index entries always
+// match the archive that a release would install.
 
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as yaml from './miniyaml.mjs';
 import { findMember } from './minitar.mjs';
@@ -37,6 +44,9 @@ if (args.has('--help') || args.has('-h')) {
 
 const log = (...a) => console.log(...a);
 const die = (msg) => { console.error(`error: ${msg}`); process.exit(1); };
+
+// Only a source: local entry needs Helm. Every other source is plain https.
+const HELM_BIN = process.env.CITADEL_HELM_BIN || 'helm';
 
 const lock = yaml.parse(readFileSync(LOCK_FILE, 'utf8'));
 if (!lock || !Array.isArray(lock.charts) || lock.charts.length === 0) {
@@ -120,7 +130,50 @@ async function fetchOci(entry) {
   return Buffer.from(await res.arrayBuffer());
 }
 
-const fetchChart = (e) => (e.source === 'oci' ? fetchOci(e) : fetchHttp(e));
+// Charts that this repository builds rather than downloads.
+//
+//   source: local
+//   path: charts-src/litellm      the chart directory, relative to the repo root
+//
+// There is no upstream to pull: helm packages the directory here, so the archive
+// citadel serves is the one this repository produced. It lands in charts/ like
+// any other archive, and the digest check that follows is what proves that a
+// re-run reproduces it. Nothing is written into charts/ by the package step
+// itself; helm writes into a temporary directory that is discarded again, so a
+// digest mismatch still stops the run before anything is written.
+function fetchLocal(entry) {
+  const dir = entry.path ? String(entry.path) : '';
+  if (!dir) die(`${entry.name}: local source has no path`);
+  const abs = join(ROOT, dir);
+  if (!existsSync(abs)) die(`${entry.name}: local source path ${dir} does not exist`);
+  const file = entry.file || `${entry.name}-${entry.version}.tgz`;
+
+  // helm is optional for every other source, so only report it when a local
+  // entry actually needs it.
+  const version = spawnSync(HELM_BIN, ['version', '--short'], { encoding: 'utf8' });
+  if (version.error) {
+    console.error(`error: ${entry.name}: source local needs the command "${HELM_BIN}", which was not found.`);
+    console.error(`  It packages ${dir} into ${file}. Install Helm (https://helm.sh/docs/intro/install/)`);
+    console.error(`  or set CITADEL_HELM_BIN to its path. Every other source needs no Helm.`);
+    process.exit(1);
+  }
+  if (version.status !== 0) die(`${entry.name}: helm is not runnable\n  ${(version.stderr || version.stdout || '').trim().slice(0, 300)}`);
+
+  const out = mkdtempSync(join(tmpdir(), 'citadel-local-'));
+  try {
+    const run = spawnSync(HELM_BIN, ['package', abs, '-d', out], { encoding: 'utf8' });
+    if (run.status !== 0) {
+      die(`${entry.name}: helm package ${dir} failed\n  ${(run.stderr || run.stdout || '').trim().slice(0, 500)}`);
+    }
+    const built = readdirSync(out).filter((f) => f.endsWith('.tgz'));
+    if (built.length !== 1) die(`${entry.name}: helm package ${dir} wrote ${built.length} archives, expected 1`);
+    return readFileSync(join(out, built[0]));
+  } finally {
+    rmSync(out, { recursive: true, force: true });
+  }
+}
+
+const fetchChart = (e) => (e.source === 'oci' ? fetchOci(e) : e.source === 'local' ? fetchLocal(e) : fetchHttp(e));
 
 // ------------------------------------------------------------------- archiving
 
@@ -162,7 +215,12 @@ for (const entry of lockCharts) {
   const digest = sha256(buf);
   if (entry.digest) {
     if (entry.digest !== digest) {
-      if (!update) die(`${file}\n  digest mismatch\n  pinned ${entry.digest}\n  got    ${digest}`);
+      if (!update) {
+        // A chart packaged from charts-src/ cannot be rebuilt byte for byte, so
+        // say what to do about it instead of leaving a confusing dead end.
+        const note = entry.source === 'local' ? `\n  ${entry.name} is source: local. helm stamps the build time into the archive, so a rebuild of ${entry.path ?? 'its source'} always hashes differently. Run with --update to store the new digest.` : '';
+        die(`${file}\n  digest mismatch\n  pinned ${entry.digest}\n  got    ${digest}${note}`);
+      }
       entry.digest = digest;
       changed++;
     }

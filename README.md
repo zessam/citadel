@@ -22,6 +22,8 @@ charts/
 ├── seaweedfs-4.53.0.tgz
 └── ...                     one archive per pinned chart version
 charts.lock.yaml            the pins that tools/fetch-charts.mjs reads
+charts-src/
+└── litellm/                the source of the one chart we build, not download
 tools/
 ├── fetch-charts.mjs        download, verify, rebuild index.yaml
 ├── selftest.mjs            check the repository, no cluster or Helm needed
@@ -72,7 +74,7 @@ repository through the `ref: values` source.
 
 ## Charts
 
-Thirteen charts, 2.9 MB, pinned at the versions that
+Fourteen charts, 3.1 MB, pinned at the versions that
 `ai-inference-platform/argocd/apps/` names. Run `node tools/selftest.mjs` to see
 the same table verified against the files on disk.
 
@@ -91,21 +93,23 @@ the same table verified against the files on disk.
 | kserve-runtime-configs | v0.21.0 | ghcr.io/kserve/charts (OCI) | argocd/apps/management/kserve/kserve-runtime-configs.yaml |
 | cloudnative-pg | 0.29.1 | https://cloudnative-pg.github.io/charts | argocd/apps/management/litellm/cloudnative-pg.yaml |
 | litellm-helm | 1.106.7 | ghcr.io/berriai (OCI) | argocd/apps/management/litellm/litellm.yaml |
+| litellm | 1.106.7-1 | built here from `charts-src/litellm` | nothing yet, see [charts we build](#charts-we-build) |
 
 ### What is not here
 
-- **The four charts that live in the platform repository.** `helm/inference/vllm`,
-  `helm/management/kserve/kserve-gateway`, `helm/management/litellm/litellm-db`
-  and `helm/monitoring/grafana-dashboards` are source charts, not downloads. Their
-  Applications use `path:` on the platform repository, so citadel has nothing to
-  serve.
+- **The three charts that live in the platform repository.** `helm/inference/vllm`,
+  `helm/management/kserve/kserve-gateway` and `helm/monitoring/grafana-dashboards`
+  are source charts, not downloads. Their Applications use `path:` on the platform
+  repository, so citadel has nothing to serve. The fourth of them,
+  `helm/management/litellm/litellm-db`, is now bundled into the `litellm` umbrella
+  chart, so citadel does serve it: as part of that archive.
 - **Subcharts are not separate entries.** `kube-prometheus-stack`, `gateway-helm`,
   `litellm-helm`, `cloudnative-pg` and the rest ship their dependencies inside
   their own archive, so Helm resolves a release from one download.
 
 ## OCI charts
 
-Seven of the thirteen charts live in an OCI registry rather than a tar index.
+Seven of the fourteen charts live in an OCI registry rather than a tar index.
 `tools/fetch-charts.mjs` pulls them through the registry API, takes the
 `application/vnd.cncf.helm.chart.content.v1.tar+gzip` layer, and stores it as an
 ordinary archive. What lands in `charts/` is identical to what `helm pull
@@ -142,15 +146,46 @@ node tools/fetch-charts.mjs --force   # re-download everything
 node tools/fetch-charts.mjs --update  # re-download and refresh digests in the lock
 ```
 
-Only Node is required. No Helm, no Python, no container registry credentials.
+Only Node is required, except for the `local` chart, which this repository builds
+and so needs `helm package`. No Python, no container registry credentials.
 Registries that need a token, such as ghcr.io, hand one to the script during the
 anonymous pull.
+
+### Charts we build
+
+One entry, `litellm`, is not a copy of anything. Its source is the chart directory
+`charts-src/litellm`, and the lock declares it
+
+```yaml
+  - name: litellm
+    source: local
+    path: charts-src/litellm
+    file: litellm-1.106.7-1.tgz
+```
+
+The same run of `tools/fetch-charts.mjs` that downloads the other thirteen packages
+this one with `helm package` and writes the archive into `charts/`, so
+`charts.lock.yaml` stays the whole recipe: nothing in `charts/` is manual.
+
+`litellm` is an umbrella chart, one Helm release that installs the gateway and its
+database together. It pulls in two dependencies, both bundled in `charts-src/litellm/charts/`:
+the vendored `litellm-helm` archive above, byte for byte, and the CloudNativePG
+`litellm-db` chart copied out of the platform repository. Helm expands both into
+directories inside the packed archive, which is why the whole release installs
+from one download.
+
+The one thing that does not survive a rebuild is the archive's own bytes. Helm
+stamps the packaging time into every entry of the tar, so `digest` identifies the
+archive that was committed here, not the source: a rebuild an hour later hashes
+differently even though `diff -r` of the two extracted trees is empty. Keep the
+pin, and run with `--update` after editing a chart under `charts-src/`.
 
 ### Add or bump a chart
 
 1. Change `charts.lock.yaml`. Copy a `charts:` entry and set `name`, `version`,
-   `tag`, `source`, `repository` or `registry`, and `url`. Leave `digest` and
-   `size` empty or wrong on purpose, the fetch fills them in.
+   `tag`, `source`, `repository` or `registry`, and `url` — or `path`, for a chart
+   built from `charts-src/`. Leave `digest` and `size` empty or wrong on purpose,
+   the fetch fills them in.
 2. Run `node tools/fetch-charts.mjs --update`. The script downloads the archive,
    writes it into `charts/`, refreshes `index.yaml`, and stores the real digest in
    the lock.
