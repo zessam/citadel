@@ -1,0 +1,15 @@
+{
+  "name": "citadel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pinned Helm chart archives and the tools that keep them honest",
+  "type": "module",
+  "scripts": {
+    "fetch": "node tools/fetch-charts.mjs",
+    "check": "node tools/fetch-charts.mjs --check",
+    "test": "node tools/selftest.mjs"
+  },
+  "devDependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}
