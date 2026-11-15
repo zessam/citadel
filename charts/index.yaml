@@ -1,0 +1,363 @@
+apiVersion: v1
+entries:
+  ai-gateway-crds-helm:
+    - apiVersion: v2
+      name: ai-gateway-crds-helm
+      version: v1.1.0
+      appVersion: v1.1.0
+      description: The Helm chart for Envoy AI Gateway CRD
+      type: application
+      keywords:
+        - gateway-api
+        - envoyproxy
+        - envoy-gateway
+        - eg
+        - ai-gateway
+        - ai
+      home: https://aigateway.envoyproxy.io/
+      sources:
+        - https://github.com/envoyproxy/ai-gateway
+      maintainers:
+        - name: envoy-ai-gateway-maintainers
+          url: https://github.com/envoyproxy/ai-gateway/blob/main/CODEOWNERS
+      icon: https://raw.githubusercontent.com/envoyproxy/ai-gateway/refs/heads/main/site/static/img/logo.svg
+      digest: 72dec23cc278ad09ca7dd95806735f68e0bd6f7ff0e28606c971bef1e4a14b86
+      created: "2026-08-21T17:49:07Z"
+      urls:
+        - ./ai-gateway-crds-helm-v1.1.0.tgz
+  ai-gateway-helm:
+    - apiVersion: v2
+      name: ai-gateway-helm
+      version: v1.1.0
+      appVersion: v1.1.0
+      description: The Helm chart for Envoy AI Gateway
+      type: application
+      keywords:
+        - gateway-api
+        - envoyproxy
+        - envoy-gateway
+        - eg
+        - ai-gateway
+        - ai
+      home: https://aigateway.envoyproxy.io/
+      sources:
+        - https://github.com/envoyproxy/ai-gateway
+      maintainers:
+        - name: envoy-ai-gateway-maintainers
+          url: https://github.com/envoyproxy/ai-gateway/blob/main/CODEOWNERS
+      icon: https://raw.githubusercontent.com/envoyproxy/ai-gateway/refs/heads/main/site/static/img/logo.svg
+      digest: 2d9cbdc0516257cb6f78c50ae19cf43a3ac8860fd8aeaa89b683225a9243e274
+      created: "2026-08-21T17:49:07Z"
+      urls:
+        - ./ai-gateway-helm-v1.1.0.tgz
+  cert-manager:
+    - apiVersion: v2
+      name: cert-manager
+      version: v1.21.3
+      appVersion: v1.21.3
+      description: A Helm chart for cert-manager
+      keywords:
+        - cert-manager
+        - kube-lego
+        - letsencrypt
+        - tls
+      home: https://cert-manager.io
+      sources:
+        - https://github.com/cert-manager/cert-manager
+      maintainers:
+        - email: cert-manager-maintainers@googlegroups.com
+          name: cert-manager-maintainers
+          url: https://cert-manager.io
+      icon: https://raw.githubusercontent.com/cert-manager/community/4d35a69437d21b76322157e6284be4cd64e6d2b7/logo/logo-small.png
+      annotations:
+        artifacthub.io/category: security
+        artifacthub.io/license: Apache-2.0
+        artifacthub.io/prerelease: "false"
+        artifacthub.io/signKey: |
+          fingerprint: 1020CF3C033D4F35BAE1C19E1226061C665DF13E
+          url: https://cert-manager.io/public-keys/cert-manager-keyring-2021-09-20-1020CF3C033D4F35BAE1C19E1226061C665DF13E.gpg
+      digest: 9ec67938b2981d8b333af61b3fcf53e26b4f6f5deb7ccda3de4ea116bb373a17
+      created: "2026-10-23T19:55:18Z"
+      urls:
+        - ./cert-manager-v1.21.3.tgz
+  cloudnative-pg:
+    - apiVersion: v2
+      name: cloudnative-pg
+      version: 0.29.1
+      appVersion: 1.30.1
+      description: CloudNativePG Operator Helm Chart
+      type: application
+      keywords:
+        - operator
+        - controller
+        - postgresql
+        - postgres
+        - database
+      home: https://cloudnative-pg.io
+      sources:
+        - https://github.com/cloudnative-pg/charts
+      maintainers:
+        - email: p.scorsolini@gmail.com
+          name: phisco
+      icon: https://raw.githubusercontent.com/cloudnative-pg/artwork/main/cloudnativepg-logo.svg
+      dependencies:
+        - alias: monitoring
+          condition: monitoring.grafanaDashboard.create
+          name: cluster
+          repository: https://cloudnative-pg.github.io/grafana-dashboards
+          version: "0.0"
+      digest: b53d3991fe84bcf38767e7702cae78666265427a127a26fff168ab4207d2b1df
+      created: "2026-09-23T16:56:38Z"
+      urls:
+        - ./cloudnative-pg-0.29.1.tgz
+  gateway-helm:
+    - apiVersion: v2
+      name: gateway-helm
+      version: v1.8.6
+      appVersion: v1.8.6
+      description: The Helm chart for Envoy Gateway
+      type: application
+      keywords:
+        - gateway-api
+        - envoyproxy
+        - envoy-gateway
+        - eg
+      home: https://gateway.envoyproxy.io/
+      sources:
+        - https://github.com/envoyproxy/gateway
+      maintainers:
+        - name: envoy-gateway-steering-committee
+          url: https://github.com/envoyproxy/gateway/blob/main/GOVERNANCE.md
+        - name: envoy-gateway-maintainers
+          url: https://github.com/envoyproxy/gateway/blob/main/CODEOWNERS
+      icon: https://raw.githubusercontent.com/envoyproxy/gateway/main/site/assets/icons/logo.svg
+      dependencies:
+        - condition: crds.enabled
+          name: crds
+          repository: ""
+          version: 0.0.0
+      digest: 2d32af9bded8df3c1d598972ae3210c9e8472b29bc6f457895061aca81d42e85
+      created: "2026-10-26T06:45:48Z"
+      urls:
+        - ./gateway-helm-v1.8.6.tgz
+  keda:
+    - apiVersion: v2
+      name: keda
+      version: 2.21.0
+      appVersion: 2.21.0
+      description: Event-based autoscaler for workloads on Kubernetes
+      home: https://github.com/kedacore/keda
+      sources:
+        - https://github.com/kedacore/keda
+      maintainers:
+        - email: jorge_turrado@hotmail.es
+          name: Jorge Turrado
+        - email: zbynek@kedify.io
+          name: Zbynek Roubalik
+        - email: jan@kedify.io
+          name: Jan Wozniak
+      icon: https://raw.githubusercontent.com/kedacore/keda/main/images/keda-logo-500x500-white.png
+      digest: a7da56bf41a33dad9d2fc82a6fdecee552fff947d80bf1e1dbcf4db0f9e26dee
+      created: "2026-09-23T16:59:21Z"
+      urls:
+        - ./keda-2.21.0.tgz
+  kserve-llmisvc-crd:
+    - apiVersion: v2
+      name: kserve-llmisvc-crd
+      version: v0.21.0
+      appVersion: v0.21.0
+      description: Helm chart for deploying LLMInferenceService crds
+      type: application
+      keywords:
+        - kserve
+        - llm
+        - llm-d
+        - inference
+        - generative-ai
+        - machine-learning
+        - model-serving
+      home: https://kserve.github.io/website/
+      sources:
+        - https://github.com/kserve/kserve
+      maintainers:
+        - name: KServe Team
+          url: https://github.com/kserve/kserve
+      icon: https://raw.githubusercontent.com/kserve/website/main/docs/images/logo.png
+      annotations:
+        category: AI/Machine Learning
+      digest: 057a71f4f106c999147c11dfead15cfd08d1993803be7a69922ae77c1b26cad7
+      created: "2026-10-12T18:02:14Z"
+      urls:
+        - ./kserve-llmisvc-crd-v0.21.0.tgz
+  kserve-llmisvc-resources:
+    - apiVersion: v2
+      name: kserve-llmisvc-resources
+      version: v0.21.0
+      appVersion: v0.21.0
+      description: Helm chart for deploying KServe LLMInferenceService resources
+      type: application
+      keywords:
+        - kserve
+        - llm
+        - llm-d
+        - inference
+        - generative-ai
+        - machine-learning
+        - model-serving
+      home: https://kserve.github.io/website/
+      sources:
+        - https://github.com/kserve/kserve
+      maintainers:
+        - name: KServe Team
+          url: https://github.com/kserve/kserve
+      icon: https://raw.githubusercontent.com/kserve/website/main/docs/images/logo.png
+      annotations:
+        category: AI/Machine Learning
+      digest: 471d56d3f8b20dfe5dcf5772d0577f18eebd7016aed59a2cda34e522bbb64a5b
+      created: "2026-10-12T18:02:14Z"
+      urls:
+        - ./kserve-llmisvc-resources-v0.21.0.tgz
+  kserve-runtime-configs:
+    - apiVersion: v2
+      name: kserve-runtime-configs
+      version: v0.21.0
+      appVersion: v0.21.0
+      description: KServe Runtime Configurations - ClusterServingRuntimes and LLM Inference Configs
+      type: application
+      keywords:
+        - kserve
+        - clusterservingruntime
+        - llminferenceserviceconfig
+        - serving-runtime
+        - machine-learning
+        - model-serving
+      home: https://kserve.github.io/website/
+      sources:
+        - https://github.com/kserve/kserve
+      maintainers:
+        - name: KServe Team
+          url: https://github.com/kserve/kserve
+      icon: https://raw.githubusercontent.com/kserve/website/main/docs/images/logo.png
+      annotations:
+        category: AI/Machine Learning
+      digest: 02602f64f18791f90b10c0a1a8c505b70a7e28567993ec7fa273a397eda3ada5
+      created: "2026-10-12T18:02:14Z"
+      urls:
+        - ./kserve-runtime-configs-v0.21.0.tgz
+  kube-prometheus-stack:
+    - apiVersion: v2
+      name: kube-prometheus-stack
+      version: 93.1.2
+      appVersion: v0.95.2
+      description: kube-prometheus-stack collects Kubernetes manifests, Grafana dashboards, and Prometheus rules combined with documentation and scripts to provide easy to operate end-to-end Kubernetes cluster monitoring with Prometheus using the Prometheus Operator.
+      type: application
+      keywords:
+        - operator
+        - prometheus
+        - kube-prometheus
+      home: https://github.com/prometheus-operator/kube-prometheus
+      sources:
+        - https://github.com/prometheus-community/helm-charts
+        - https://github.com/prometheus-operator/kube-prometheus
+      maintainers:
+        - email: andrew@quadcorps.co.uk
+          name: andrewgkew
+          url: https://github.com/andrewgkew
+        - email: gianrubio@gmail.com
+          name: gianrubio
+          url: https://github.com/gianrubio
+        - email: github.gkarthiks@gmail.com
+          name: gkarthiks
+          url: https://github.com/gkarthiks
+        - email: kube-prometheus-stack@sisti.pt
+          name: GMartinez-Sisti
+          url: https://github.com/GMartinez-Sisti
+        - email: github@jkroepke.de
+          name: jkroepke
+          url: https://github.com/jkroepke
+        - email: miroslav.hadzhiev@gmail.com
+          name: Xtigyro
+          url: https://github.com/Xtigyro
+        - email: quentin.bisson@gmail.com
+          name: QuentinBisson
+          url: https://github.com/QuentinBisson
+      icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/assets/prometheus_logo-cb55bb5c346.png
+      dependencies:
+        - condition: crds.enabled
+          name: crds
+          repository: ""
+          version: 0.0.0
+        - condition: kubeStateMetrics.enabled
+          name: kube-state-metrics
+          repository: oci://ghcr.io/prometheus-community/charts
+          version: 9.0.0
+        - condition: nodeExporter.enabled
+          name: prometheus-node-exporter
+          repository: oci://ghcr.io/prometheus-community/charts
+          version: 5.0.1
+        - condition: grafana.enabled
+          name: grafana
+          repository: oci://ghcr.io/grafana-community/helm-charts
+          version: 14.4.1
+        - condition: windowsMonitoring.enabled
+          name: prometheus-windows-exporter
+          repository: oci://ghcr.io/prometheus-community/charts
+          version: 0.14.0
+      annotations:
+        artifacthub.io/license: Apache-2.0
+        artifacthub.io/links: |
+          - name: Chart Source
+            url: https://github.com/prometheus-community/helm-charts
+          - name: Upstream Project
+            url: https://github.com/prometheus-operator/kube-prometheus
+          - name: Upgrade Process
+            url: https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/README.md#upgrading-chart
+        artifacthub.io/operator: "true"
+      digest: 67c300df3009e968110b6d7e929f5ed5fe5f7b355df7faf73f0837431cd59c4c
+      created: "2026-11-10T19:44:50Z"
+      urls:
+        - ./kube-prometheus-stack-93.1.2.tgz
+  litellm-helm:
+    - apiVersion: v2
+      name: litellm-helm
+      version: 1.106.7
+      appVersion: 1.106.7
+      description: Call all LLM APIs using the OpenAI format
+      type: application
+      dependencies:
+        - condition: db.deployStandalone
+          name: postgresql
+          repository: oci://registry-1.docker.io/bitnamicharts
+          version: 14.3.1
+        - condition: redis.enabled
+          name: redis
+          repository: oci://registry-1.docker.io/bitnamicharts
+          version: 18.19.1
+      annotations:
+        org.opencontainers.image.source: https://github.com/BerriAI/litellm
+        org.opencontainers.image.url: https://docs.litellm.ai/
+      digest: 870d0e849bd907952eaecd71486452c77ddd2bbb26d3524899d2110b0988b06f
+      created: "2026-11-04T04:29:06Z"
+      urls:
+        - ./litellm-helm-1.106.7.tgz
+  lws:
+    - apiVersion: v2
+      name: lws
+      version: v0.8.0
+      appVersion: v0.8.0
+      description: A Helm chart for Kubernetes
+      type: application
+      digest: ce453e12d914608a0e361f8a7367f14169e86a466440af26c4ecc279cbae2da7
+      created: "2026-01-26T19:53:22Z"
+      urls:
+        - ./lws-v0.8.0.tgz
+  seaweedfs:
+    - apiVersion: v1
+      name: seaweedfs
+      version: 4.53.0
+      appVersion: "4.53"
+      description: SeaweedFS
+      digest: 778f079cfbdf026a1a523569d385816d00df51ac049b1383db0cfaf6a094656c
+      created: "2026-11-08T20:49:44Z"
+      urls:
+        - ./seaweedfs-4.53.0.tgz

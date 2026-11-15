@@ -1,0 +1,180 @@
+# Pinned chart sources for citadel.
+#
+# One entry per chart archive that this repository serves. tools/fetch-charts.mjs
+# reads this file, downloads each archive, checks it against digest, writes it to
+# charts/ and rebuilds charts/index.yaml from the archives on disk.
+#
+#   node tools/fetch-charts.mjs           fetch what is missing
+#   node tools/fetch-charts.mjs --check   verify, write nothing
+#   node tools/fetch-charts.mjs --update  re-download and refresh digests
+#
+# Fields
+#   name       chart name, and the key it gets in index.yaml
+#   version    chart version inside Chart.yaml, and the filename version
+#   tag        upstream ref that Argo CD pins (targetRevision). Equal to version
+#              for http sources, where Helm uses the version itself.
+#   source     http = a tar index repository, oci = an OCI registry artifact
+#   repository index repository, or the OCI repository path
+#   url        direct archive url for http sources
+#   registry   OCI registry for oci sources
+#   digest     sha256 of the archive as stored here, as a lowercase hex string
+#   pinnedBy   the Argo CD Application that installs this chart
+#
+version: 1
+charts:
+  # storage / seaweedfs
+  - name: seaweedfs
+    version: 4.53.0
+    tag: 4.53.0
+    source: http
+    registry: ""
+    repository: https://seaweedfs.github.io/seaweedfs/helm
+    url: https://seaweedfs.github.io/seaweedfs/helm/seaweedfs-4.53.0.tgz
+    file: seaweedfs-4.53.0.tgz
+    digest: 778f079cfbdf026a1a523569d385816d00df51ac049b1383db0cfaf6a094656c
+    size: 86166
+    pinnedBy: ai-inference-platform/argocd/apps/storage/seaweedfs.yaml
+  # monitoring / kube-prometheus-stack
+  - name: kube-prometheus-stack
+    version: 93.1.2
+    tag: 93.1.2
+    source: http
+    registry: ""
+    repository: https://prometheus-community.github.io/helm-charts
+    url: https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-93.1.2/kube-prometheus-stack-93.1.2.tgz
+    file: kube-prometheus-stack-93.1.2.tgz
+    digest: 67c300df3009e968110b6d7e929f5ed5fe5f7b355df7faf73f0837431cd59c4c
+    size: 988539
+    pinnedBy: ai-inference-platform/argocd/apps/monitoring/kube-prometheus-stack.yaml
+  # management/kserve / cert-manager
+  - name: cert-manager
+    version: v1.21.3
+    tag: v1.21.3
+    source: http
+    registry: ""
+    repository: https://charts.jetstack.io
+    url: https://charts.jetstack.io/charts/cert-manager-v1.21.3.tgz
+    file: cert-manager-v1.21.3.tgz
+    digest: 9ec67938b2981d8b333af61b3fcf53e26b4f6f5deb7ccda3de4ea116bb373a17
+    size: 153406
+    pinnedBy: ai-inference-platform/argocd/apps/management/kserve/cert-manager.yaml
+  # management/kserve / lws
+  - name: lws
+    version: v0.8.0
+    tag: v0.8.0
+    source: oci
+    registry: registry.k8s.io
+    repository: lws/charts/lws
+    url: ""
+    file: lws-v0.8.0.tgz
+    digest: ce453e12d914608a0e361f8a7367f14169e86a466440af26c4ecc279cbae2da7
+    size: 151980
+    pinnedBy: ai-inference-platform/argocd/apps/management/kserve/lws.yaml
+  # management / keda
+  - name: keda
+    version: 2.21.0
+    tag: 2.21.0
+    source: http
+    registry: ""
+    repository: https://kedacore.github.io/charts
+    url: https://kedacore.github.io/charts/keda-2.21.0.tgz
+    file: keda-2.21.0.tgz
+    digest: a7da56bf41a33dad9d2fc82a6fdecee552fff947d80bf1e1dbcf4db0f9e26dee
+    size: 121909
+    pinnedBy: ai-inference-platform/argocd/apps/management/keda.yaml
+  # management/kserve / gateway-helm
+  - name: gateway-helm
+    version: v1.8.6
+    tag: v1.8.6
+    source: oci
+    registry: registry-1.docker.io
+    repository: envoyproxy/gateway-helm
+    url: ""
+    file: gateway-helm-v1.8.6.tgz
+    digest: 2d32af9bded8df3c1d598972ae3210c9e8472b29bc6f457895061aca81d42e85
+    size: 504800
+    pinnedBy: ai-inference-platform/argocd/apps/management/kserve/envoy-gateway.yaml
+  # management/kserve / ai-gateway-crds-helm
+  - name: ai-gateway-crds-helm
+    version: v1.1.0
+    tag: v1.1.0
+    source: oci
+    registry: registry-1.docker.io
+    repository: envoyproxy/ai-gateway-crds-helm
+    url: ""
+    file: ai-gateway-crds-helm-v1.1.0.tgz
+    digest: 72dec23cc278ad09ca7dd95806735f68e0bd6f7ff0e28606c971bef1e4a14b86
+    size: 252519
+    pinnedBy: ai-inference-platform/argocd/apps/management/kserve/envoy-ai-gateway-crds.yaml
+  # management/kserve / ai-gateway-helm
+  - name: ai-gateway-helm
+    version: v1.1.0
+    tag: v1.1.0
+    source: oci
+    registry: registry-1.docker.io
+    repository: envoyproxy/ai-gateway-helm
+    url: ""
+    file: ai-gateway-helm-v1.1.0.tgz
+    digest: 2d9cbdc0516257cb6f78c50ae19cf43a3ac8860fd8aeaa89b683225a9243e274
+    size: 9054
+    pinnedBy: ai-inference-platform/argocd/apps/management/kserve/envoy-ai-gateway.yaml
+  # management/kserve / kserve-llmisvc-crd
+  - name: kserve-llmisvc-crd
+    version: v0.21.0
+    tag: v0.21.0
+    source: oci
+    registry: ghcr.io
+    repository: kserve/charts/kserve-llmisvc-crd
+    url: ""
+    file: kserve-llmisvc-crd-v0.21.0.tgz
+    digest: 057a71f4f106c999147c11dfead15cfd08d1993803be7a69922ae77c1b26cad7
+    size: 254626
+    pinnedBy: ai-inference-platform/argocd/apps/management/kserve/kserve-llmisvc-crd.yaml
+  # management/kserve / kserve-llmisvc-resources
+  - name: kserve-llmisvc-resources
+    version: v0.21.0
+    tag: v0.21.0
+    source: oci
+    registry: ghcr.io
+    repository: kserve/charts/kserve-llmisvc-resources
+    url: ""
+    file: kserve-llmisvc-resources-v0.21.0.tgz
+    digest: 471d56d3f8b20dfe5dcf5772d0577f18eebd7016aed59a2cda34e522bbb64a5b
+    size: 28092
+    pinnedBy: ai-inference-platform/argocd/apps/management/kserve/kserve-llmisvc-resources.yaml
+  # management/kserve / kserve-runtime-configs
+  - name: kserve-runtime-configs
+    version: v0.21.0
+    tag: v0.21.0
+    source: oci
+    registry: ghcr.io
+    repository: kserve/charts/kserve-runtime-configs
+    url: ""
+    file: kserve-runtime-configs-v0.21.0.tgz
+    digest: 02602f64f18791f90b10c0a1a8c505b70a7e28567993ec7fa273a397eda3ada5
+    size: 22434
+    pinnedBy: ai-inference-platform/argocd/apps/management/kserve/kserve-runtime-configs.yaml
+  # management/litellm / cloudnative-pg
+  - name: cloudnative-pg
+    version: 0.29.1
+    tag: 0.29.1
+    source: http
+    registry: ""
+    repository: https://cloudnative-pg.github.io/charts
+    url: https://github.com/cloudnative-pg/charts/releases/download/cloudnative-pg-v0.29.1/cloudnative-pg-0.29.1.tgz
+    file: cloudnative-pg-0.29.1.tgz
+    digest: b53d3991fe84bcf38767e7702cae78666265427a127a26fff168ab4207d2b1df
+    size: 205129
+    pinnedBy: ai-inference-platform/argocd/apps/management/litellm/cloudnative-pg.yaml
+  # management/litellm / litellm-helm
+  - name: litellm-helm
+    version: 1.106.7
+    tag: 1.106.7
+    source: oci
+    registry: ghcr.io
+    repository: berriai/litellm-helm
+    url: ""
+    file: litellm-helm-1.106.7.tgz
+    digest: 870d0e849bd907952eaecd71486452c77ddd2bbb26d3524899d2110b0988b06f
+    size: 197232
+    pinnedBy: ai-inference-platform/argocd/apps/management/litellm/litellm.yaml
